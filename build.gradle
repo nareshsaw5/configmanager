@@ -1,0 +1,40 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+plugins {
+	id 'org.springframework.boot' version '2.7.2'
+	id 'io.spring.dependency-management' version '1.0.12.RELEASE'
+	id 'java'
+	id 'com.bmuschko.docker-remote-api' version '3.2.5'
+}
+
+group = 'nokia.cns.mediation'
+version = '0.0.1-SNAPSHOT'
+
+
+apply plugin: "com.bmuschko.docker-remote-api"
+
+repositories {
+	mavenCentral()
+	jcenter()
+}
+
+String getConfigurationProperty(String envVar, String sysProp) {
+	System.getenv(envVar) ?: project.findProperty(sysProp)
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+task buildDockerImage(type: DockerBuildImage) {
+	inputDir = project.projectDir
+	tags = ['nareshsaw5/configmanager:latest']
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+project.tasks.buildDockerImage.dependsOn(project.tasks.build)
